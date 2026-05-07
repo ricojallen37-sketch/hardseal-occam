@@ -1,0 +1,184 @@
+{
+  "run_uuid": "0c2a1ddb-be6a-4b0f-9b16-c312b29fe003",
+  "agent": "HardsealOccam",
+  "agent_version": "0.4.0",
+  "wrapped_solver": "occam-solver@e3be26a (MIT)",
+  "trace_primitive": "hardseal-trace@0.2.0 (Apache-2.0)",
+  "wall_s": 1834.1,
+  "rhae_pct": 0.0,
+  "games_solved": 0,
+  "n_games": 25,
+  "scorecard_id": "698b2a5d-f520-4401-8dd2-66e73429aeb7",
+  "trace_count": 785,
+  "avg_pods": 0.2643312101910828,
+  "all_chains_valid": true,
+  "per_game_validation": [
+    {
+      "game_idx": 0,
+      "valid": true,
+      "msg": "OK: 41 traces verified",
+      "trace_count": 41
+    },
+    {
+      "game_idx": 1,
+      "valid": true,
+      "msg": "OK: 36 traces verified",
+      "trace_count": 36
+    },
+    {
+      "game_idx": 2,
+      "valid": true,
+      "msg": "OK: 36 traces verified",
+      "trace_count": 36
+    },
+    {
+      "game_idx": 3,
+      "valid": true,
+      "msg": "OK: 8 traces verified",
+      "trace_count": 8
+    },
+    {
+      "game_idx": 4,
+      "valid": true,
+      "msg": "OK: 9 traces verified",
+      "trace_count": 9
+    },
+    {
+      "game_idx": 5,
+      "valid": true,
+      "msg": "OK: 40 traces verified",
+      "trace_count": 40
+    },
+    {
+      "game_idx": 6,
+      "valid": true,
+      "msg": "OK: 8 traces verified",
+      "trace_count": 8
+    },
+    {
+      "game_idx": 7,
+      "valid": true,
+      "msg": "OK: 9 traces verified",
+      "trace_count": 9
+    },
+    {
+      "game_idx": 8,
+      "valid": true,
+      "msg": "OK: 9 traces verified",
+      "trace_count": 9
+    },
+    {
+      "game_idx": 9,
+      "valid": true,
+      "msg": "OK: 41 traces verified",
+      "trace_count": 41
+    },
+    {
+      "game_idx": 10,
+      "valid": true,
+      "msg": "OK: 39 traces verified",
+      "trace_count": 39
+    },
+    {
+      "game_idx": 11,
+      "valid": true,
+      "msg": "OK: 38 traces verified",
+      "trace_count": 38
+    },
+    {
+      "game_idx": 12,
+      "valid": true,
+      "msg": "OK: 37 traces verified",
+      "trace_count": 37
+    },
+    {
+      "game_idx": 13,
+      "valid": true,
+      "msg": "OK: 36 traces verified",
+      "trace_count": 36
+    },
+    {
+      "game_idx": 14,
+      "valid": true,
+      "msg": "OK: 36 traces verified",
+      "trace_count": 36
+    },
+    {
+      "game_idx": 15,
+      "valid": true,
+      "msg": "OK: 40 traces verified",
+      "trace_count": 40
+    },
+    {
+      "game_idx": 16,
+      "valid": true,
+      "msg": "OK: 36 traces verified",
+      "trace_count": 36
+    },
+    {
+      "game_idx": 17,
+      "valid": true,
+      "msg": "OK: 8 traces verified",
+      "trace_count": 8
+    },
+    {
+      "game_idx": 18,
+      "valid": true,
+      "msg": "OK: 36 traces verified",
+      "trace_count": 36
+    },
+    {
+      "game_idx": 19,
+      "valid": true,
+      "msg": "OK: 40 traces verified",
+      "trace_count": 40
+    },
+    {
+      "game_idx": 20,
+      "valid": true,
+      "msg": "OK: 42 traces verified",
+      "trace_count": 42
+    },
+    {
+      "game_idx": 21,
+      "valid": true,
+      "msg": "OK: 41 traces verified",
+      "trace_count": 41
+    },
+    {
+      "game_idx": 22,
+      "valid": true,
+      "msg": "OK: 41 traces verified",
+      "trace_count": 41
+    },
+    {
+      "game_idx": 23,
+      "valid": true,
+      "msg": "OK: 37 traces verified",
+      "trace_count": 37
+    },
+    {
+      "game_idx": 24,
+      "valid": true,
+      "msg": "OK: 41 traces verified",
+      "trace_count": 41
+    }
+  ],
+  "callback_stats": {
+    "events_received": 1117,
+    "events_handled": 1117,
+    "traces_emitted": 785,
+    "errors": 0
+  },
+  "fingerprints": {
+    "occam_upstream/solver/orchestrator.py": "f5a216786a58fa61b81f837cc98bb5fac4504eb95f66be13d7e406d885e4087c",
+    "occam_upstream/solver/benchmark.py": "938d9f8a0d2e725d3cc02b25e2191e14f22c6d6866af60ac549aecbc5a0b1c98",
+    "hardseal_trace/__init__.py": "4779294fe3be5d01cea9c7164c089f86269c519d289bd005dab997fe30c01b20",
+    "hardseal_occam/tracer_callback.py": "947730f29de808a529de43b254849881aa3cb8d371194d765a22b7e8e560ae77",
+    "hardseal_occam/runner.py": "f525c84946a6188860b7efe07d92cf9b67096bbd280c95cfa9d4d4ef34104fd4",
+    "LICENSE": "9928eefab4315857c316eef4f5f7a2accac2ae4caa86ea4d79aac1a1b3c1a31b",
+    "NOTICE.md": "1443d1ed7abd075faad83881906eefe16b036b09e41a2188ace8d5f0d5ff2fe0",
+    "LICENSES/MIT-occam.txt": "d7a141bc01bb892b2439395d4c38dc38763bc3b6166c6f6c813126b3ba0b15a8",
+    "LICENSES/Apache-2.0-hardseal-trace.txt": "59e8acd1dba2f0456acd2efa2e04fa8e39a4ed46d44948b26d0334c704f0a8ca"
+  }
+}
