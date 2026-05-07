@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OCCAM Solver — ARC-AGI-3</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔬</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #08080f;
+  --bg2:     #0d0d1a;
+  --bg3:     #12122a;
+  --bg4:     #1a1a2e;
+  --border:  #2a2a3e;
+  --border2: #3a3a5e;
+  --text:    #e0e0f0;
+  --text2:   #9090b0;
+  --text3:   #606080;
+  --green:   #2ECC40;
+  --yellow:  #FFDC00;
+  --red:     #FF4136;
+  --blue:    #0074D9;
+  --blue2:   #7FDBFF;
+  --purple:  #F012BE;
+  --orange:  #FF851B;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* ── Top Bar ─────────────────────────────────────────────────────────────── */
+#top-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+#top-bar h1 {
+  font-size: 18px;
+  letter-spacing: 2px;
+  line-height: 1;
+  white-space: nowrap;
+  margin-right: 2px;
+}
+#top-bar h1 .bold  { font-weight: 900; color: var(--blue2); }
+#top-bar h1 .light { font-weight: 300; color: var(--text2); font-size: 13px; }
+
+#conn-dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--red);
+  vertical-align: middle;
+  margin-left: 4px;
+  transition: background 0.3s;
+}
+#conn-dot.connected { background: var(--green); }
+
+.run-btn {
+  background: var(--green);
+  color: #000;
+  font-weight: 700;
+  font-family: inherit;
+  font-size: 12px;
+  padding: 5px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+.run-btn:hover { opacity: 0.85; }
+.run-btn.stop { background: var(--red); color: #fff; }
+
+.top-select, .top-input {
+  background: var(--bg3);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-family: inherit;
+}
+.top-input { width: 80px; }
+
+.top-spacer { flex: 1; }
+
+#top-timer {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--blue2);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+}
+
+#top-rhae {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+#top-score {
+  font-size: 11px;
+  color: var(--text2);
+  white-space: nowrap;
+}
+
+/* ── Sub-bar (badges) ────────────────────────────────────────────────────── */
+#sub-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+
+.badge {
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.badge-g { background: rgba(46,204,64,0.12); border: 1px solid rgba(46,204,64,0.3); color: var(--green); }
+.badge-b { background: rgba(0,116,217,0.12); border: 1px solid rgba(0,116,217,0.3); color: var(--blue2); }
+.badge-p { background: rgba(240,18,190,0.12); border: 1px solid rgba(240,18,190,0.3); color: var(--purple); }
+
+/* ── Tile Bar ────────────────────────────────────────────────────────────── */
+#tile-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.tile {
+  width: 36px; height: 28px;
+  border-radius: 4px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.12s, border-color 0.12s;
+  flex-shrink: 0;
+}
+.tile:hover { transform: scale(1.1); border-color: var(--blue2); z-index: 2; }
+.tile .tid { font-size: 6px; font-weight: 700; color: var(--text3); line-height: 1; }
+.tile .tpct { font-size: 8px; font-weight: 700; line-height: 1; color: var(--text3); }
+.tile.active  { background: rgba(255,220,0,0.1); border-color: var(--yellow); }
+.tile.active .tid, .tile.active .tpct { color: var(--yellow); }
+.tile.solved  { background: rgba(46,204,64,0.12); border-color: var(--green); }
+.tile.solved .tid, .tile.solved .tpct { color: var(--green); }
+.tile.failed  { background: rgba(255,65,54,0.12); border-color: var(--red); }
+.tile.failed .tid, .tile.failed .tpct { color: var(--red); }
+.tile.current { box-shadow: 0 0 0 2px var(--blue2); }
+
+/* ── Main Panel ──────────────────────────────────────────────────────────── */
+#main-panel {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  padding: 10px 0;
+}
+
+@media (max-width: 600px) {
+  #main-panel { grid-template-columns: 1fr; }
+}
+
+/* Console frame (Game Boy style) */
+#console {
+  width: 300px;
+  background: linear-gradient(145deg, #004a7a 0%, #003660 50%, #004070 100%);
+  border-radius: 16px 16px 40px 40px;
+  border: 2px solid #006aaa;
+  padding: 16px 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+@media (max-width: 600px) { #console { width: 100%; } }
+
+#console-label {
+  text-align: center;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+
+#screen-bezel {
+  background: #060a12;
+  border-radius: 8px;
+  padding: 8px;
+  border: 2px solid #002a4a;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+}
+
+#canvas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  margin-bottom: 4px;
+}
+#canvas-game { font-weight: 700; color: var(--green); font-size: 11px; }
+#canvas-level { color: var(--blue2); font-size: 10px; }
+#canvas-phase {
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: rgba(46,204,64,0.1);
+  border: 1px solid rgba(46,204,64,0.3);
+  color: var(--green);
+}
+
+#game-canvas {
+  width: 100%;
+  aspect-ratio: 1;
+  image-rendering: pixelated;
+  border-radius: 4px;
+  background: #000;
+  display: block;
+}
+
+/* Console info bar below screen */
+#console-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 9px;
+  color: var(--text3);
+  padding: 0 2px;
+}
+#console-info .ci-val { color: var(--text2); font-weight: 600; }
+
+/* Console d-pad decoration */
+#console-deco {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px 0;
+}
+.dpad {
+  width: 36px; height: 36px;
+  position: relative;
+}
+.dpad::before, .dpad::after {
+  content: '';
+  position: absolute;
+  background: #005a90;
+  border-radius: 2px;
+}
+.dpad::before { width: 12px; height: 36px; left: 12px; top: 0; }
+.dpad::after { width: 36px; height: 12px; left: 0; top: 12px; }
+.console-dots {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+.console-dots span {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: #005a90;
+}
+.ab-btns {
+  display: flex;
+  gap: 8px;
+}
+.ab-btn {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: #005a90;
+  border: 1px solid #007abb;
+}
+
+/* ── Metrics column ──────────────────────────────────────────────────────── */
+#metrics-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.m-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.m-box {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 8px;
+  text-align: center;
+}
+.m-box .m-val {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.m-box .m-lbl {
+  font-size: 8px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 3px;
+}
+.m-box.hl .m-val { color: var(--green); }
+
+/* Strategy label */
+#strategy-row {
+  font-size: 10px;
+  color: var(--text2);
+}
+
+/* Decision log */
+#log-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+#log-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.log-title {
+  font-size: 9px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+#decision-log {
+  flex: 1;
+  min-height: 100px;
+  max-height: 260px;
+  overflow-y: auto;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+  font-size: 10px;
+  color: var(--text2);
+}
+
+.log-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  line-height: 1.3;
+  animation: log-in 0.15s ease;
+}
+@keyframes log-in {
+  from { opacity: 0; transform: translateY(-3px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.log-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.log-dot.probe   { background: var(--blue2); }
+.log-dot.state   { background: var(--green); }
+.log-dot.bfs     { background: var(--purple); }
+.log-dot.phase   { background: var(--yellow); }
+.log-dot.solved  { background: var(--green); }
+.log-dot.failed  { background: var(--red); }
+.log-dot.reset   { background: var(--orange); }
+.log-dot.error   { background: var(--red); }
+.log-dot.default { background: var(--text3); }
+
+/* ── Explorer (drill-down) ────────────────────────────────────────────────── */
+#explorer-view { display: none; }
+#explorer-view.active { display: block; }
+#overview-view.hidden { display: none; }
+
+.explorer-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+.explorer-bar .back-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--blue2);
+  font-family: inherit;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.explorer-bar .back-btn:hover { border-color: var(--blue2); }
+.explorer-bar .ex-title {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: var(--text);
+}
+.explorer-bar .ex-score {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--green);
+}
+
+#explorer-log {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px;
+  max-height: 500px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+.ex-log-entry {
+  font-size: 10px;
+  color: var(--text2);
+  display: flex;
+  gap: 8px;
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+.ex-log-ts { color: var(--text3); flex-shrink: 0; width: 65px; }
+.ex-log-type { flex-shrink: 0; width: 100px; }
+.ex-log-data { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── Playback bar ────────────────────────────────────────────────────────── */
+#playback-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+}
+
+.pb-btn {
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-family: inherit;
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.pb-btn:hover { border-color: var(--blue2); color: var(--text); }
+
+.speed-group { display: flex; gap: 2px; }
+.speed-group .pb-btn.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+.pb-spacer { flex: 1; }
+.pb-label { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+#footer {
+  padding: 8px 0;
+  font-size: 9px;
+  color: var(--text3);
+  text-align: center;
+  letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- OVERVIEW VIEW -->
+  <div id="overview-view">
+
+  <!-- Top Bar -->
+  <div id="top-bar">
+    <h1>
+      <span class="bold">OCCAM</span><span class="light"> Solver</span>
+      <span id="conn-dot"></span>
+    </h1>
+    <button id="btn-run" class="run-btn" onclick="toggleRun()">&#9654; Run</button>
+    <select id="sel-mode" class="top-select">
+      <option value="full">All 25</option>
+      <option value="quick">Quick 5</option>
+    </select>
+    <input id="inp-game" class="top-input" type="text" placeholder="game ID">
+    <span class="top-spacer"></span>
+    <span id="top-timer">00:00</span>
+    <span id="top-rhae">0.00%</span>
+    <span id="top-score">0/25</span>
+  </div>
+
+  <!-- Sub-bar -->
+  <div id="sub-bar">
+    <span>ARC-AGI-3</span>
+    <span class="badge badge-g">Deterministic</span>
+    <span class="badge badge-b">No LLM</span>
+    <span class="badge badge-p">Reproducible</span>
+    <span style="flex:1"></span>
+    <span>$0 cost</span>
+  </div>
+
+  <!-- Tile Bar -->
+  <div id="tile-bar"></div>
+
+  <!-- Main Panel -->
+  <div id="main-panel">
+
+    <!-- Console -->
+    <div id="console">
+      <div id="console-label">OCCAM Solver</div>
+      <div id="screen-bezel">
+        <div id="canvas-header">
+          <div>
+            <span id="canvas-game">--</span>
+            <span id="canvas-level"></span>
+          </div>
+          <span id="canvas-phase">IDLE</span>
+        </div>
+        <canvas id="game-canvas" width="64" height="64"></canvas>
+        <div id="console-info">
+          <span>States: <span class="ci-val" id="ci-states">0</span></span>
+          <span>Resets: <span class="ci-val" id="ci-resets">0</span></span>
+          <span>RHAE: <span class="ci-val" id="ci-rhae">0%</span></span>
+        </div>
+      </div>
+      <div id="console-deco">
+        <div class="dpad"></div>
+        <div class="console-dots"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="ab-btns"><div class="ab-btn"></div><div class="ab-btn"></div></div>
+      </div>
+    </div>
+
+    <!-- Metrics + Log -->
+    <div id="metrics-col">
+      <div class="m-grid">
+        <div class="m-box"><div class="m-val" id="m-states">0</div><div class="m-lbl">States</div></div>
+        <div class="m-box"><div class="m-val" id="m-frontier">0</div><div class="m-lbl">Frontier</div></div>
+        <div class="m-box"><div class="m-val" id="m-resets">0</div><div class="m-lbl">Resets</div></div>
+        <div class="m-box hl"><div class="m-val" id="m-levels">0/0</div><div class="m-lbl">Levels</div></div>
+      </div>
+      <div id="strategy-row">--</div>
+      <div id="log-wrap">
+        <div id="log-header-row">
+          <span class="log-title">Decision Log</span>
+        </div>
+        <div id="decision-log"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Playback bar -->
+  <div id="playback-bar">
+    <span class="pb-label">Speed</span>
+    <div class="speed-group" id="speed-group">
+      <button class="pb-btn on" onclick="setSpeed(1)" data-speed="1">1x</button>
+      <button class="pb-btn" onclick="setSpeed(5)" data-speed="5">5x</button>
+      <button class="pb-btn" onclick="setSpeed(10)" data-speed="10">10x</button>
+      <button class="pb-btn" onclick="setSpeed(0)" data-speed="0">Max</button>
+    </div>
+    <span class="pb-spacer"></span>
+    <button class="pb-btn" onclick="replayLast()">&#8635; Replay</button>
+  </div>
+
+  <div id="footer">OCCAM v0.1.0 &middot; Pure BFS &middot; Zero LLM calls</div>
+
+  </div><!-- /overview-view -->
+
+  <!-- EXPLORER VIEW -->
+  <div id="explorer-view">
+    <div class="explorer-bar">
+      <button class="back-btn" onclick="exitExplorer()">&#8592; Back</button>
+      <span class="ex-title" id="ex-title">--</span>
+      <span class="ex-score" id="ex-score"></span>
+      <span style="flex:1"></span>
+      <span style="font-size:10px;color:var(--text3)">Press ESC to return</span>
+    </div>
+    <div id="explorer-log"></div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+'use strict';
+
+/* ── ARC Color Palette ────────────────────────────────────────────────────── */
+var ARC_COLORS = [
+    '#000000', '#0074D9', '#FF4136', '#2ECC40', '#FFDC00',
+    '#AAAAAA', '#F012BE', '#FF851B', '#7FDBFF', '#871225',
+    '#003C78', '#C8C8FF', '#006400', '#800080', '#FFC8C8', '#FFFFFF'
+];
+
+var GAME_IDS = [
+    'AR25','BP35','CD82','CN04','DC22','FT09','G50T','KA59','LF52','LP85',
+    'LS20','M0R0','R11L','RE86','S5I5','SB26','SC25','SK48','SP80','SU15',
+    'TN36','TR87','TU93','VC33','WA30'
+];
+
+/* ── State ────────────────────────────────────────────────────────────────── */
+var S = {
+    games: {},
+    gameOrder: GAME_IDS.slice(),
+    currentGame: null,
+    speed: 1,
+    frameBuffer: [],
+    pendingAF: null,
+    grid: new Uint8Array(64 * 64),
+    metrics: { states:0, frontier:0, resets:0, levelsCompleted:0, totalLevels:0 },
+    running: false,
+    startMs: null,
+    timerInterval: null,
+    rhae: 0,
+    gamesSolved: 0,
+    totalGames: 25,
+    logEntries: [],
+    LOG_MAX: 200,
+    LOG_VISIBLE: 20,
+    // Throttle metrics updates
+    metricsDirty: false,
+    metricsRAF: null,
+};
+
+/* ── DOM ──────────────────────────────────────────────────────────────────── */
+function el(id) { return document.getElementById(id); }
+function setText(id, v) { var e = el(id); if (e) e.textContent = v; }
+
+var _colorRgb = {};
+function hexToRgb(hex) {
+    if (_colorRgb[hex]) return _colorRgb[hex];
+    var n = parseInt(hex.slice(1), 16);
+    _colorRgb[hex] = [(n>>16)&255, (n>>8)&255, n&255];
+    return _colorRgb[hex];
+}
+
+function fmt(n) {
+    if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+    if (n >= 1000)    return (n/1000).toFixed(1) + 'K';
+    return String(n);
+}
+
+function pad(n) { return ('0' + n).slice(-2); }
+
+/* ── Init ─────────────────────────────────────────────────────────────────── */
+function init() {
+    GAME_IDS.forEach(function(id) {
+        S.games[id] = { status:'pending', score:0, title:id, totalLevels:0, levels:0 };
+    });
+    renderTiles();
+    var c = el('game-canvas');
+    if (c) { var ctx = c.getContext('2d'); ctx.fillStyle = '#000'; ctx.fillRect(0,0,64,64); }
+    connect();
+}
+
+/* ── WebSocket ────────────────────────────────────────────────────────────── */
+var ws;
+function connect() {
+    try {
+        ws = new WebSocket('ws://' + location.host + '/ws');
+        ws.onopen  = function() { el('conn-dot').classList.add('connected'); };
+        ws.onclose = function() { el('conn-dot').classList.remove('connected'); setTimeout(connect, 2000); };
+        ws.onerror = function() {};
+        ws.onmessage = function(e) {
+            try { handleEvent(JSON.parse(e.data)); } catch(_) {}
+        };
+    } catch(_) { setTimeout(connect, 2000); }
+}
+
+/* ── Event Router ─────────────────────────────────────────────────────────── */
+function handleEvent(ev) {
+    // Buffer events for explorer drill-down
+    if (typeof bufferExplorerEvent === 'function') bufferExplorerEvent(ev);
+
+    if (ev.type === 'frame_diff') {
+        S.frameBuffer.push(ev.data.changes);
+        scheduleFrame();
+        return;
+    }
+    // At max speed, skip high-frequency non-visual events
+    if (S.speed === 0 && (ev.type === 'probe' || ev.type === 'bfs_step' || ev.type === 'state_discovered')) {
+        // Still update counters silently
+        if (ev.type === 'state_discovered') {
+            S.metrics.states = ev.data.total_states || (S.metrics.states + 1);
+            S.metrics.frontier = Math.max(0, (S.metrics.frontier || 0) + 1);
+            scheduleMetrics();
+        } else if (ev.type === 'bfs_step') {
+            S.metrics.frontier = Math.max(0, (S.metrics.frontier || 0) + (ev.data.is_new ? 1 : -1));
+            scheduleMetrics();
+        } else if (ev.type === 'reset') {
+            S.metrics.resets = ev.data.count || 0;
+            scheduleMetrics();
+        }
+        return;
+    }
+
+    switch (ev.type) {
+        case 'state_snapshot':     onSnapshot(ev.data);    break;
+        case 'benchmark_start':    onBenchStart(ev.data);  break;
+        case 'game_start':         onGameStart(ev.data);   break;
+        case 'game_complete':      onGameEnd(ev.data);     break;
+        case 'benchmark_complete': onBenchEnd(ev.data);    break;
+        case 'phase_change':       onPhase(ev.data);       break;
+        case 'probe':              onProbe(ev.data);       break;
+        case 'state_discovered':   onState(ev.data);       break;
+        case 'bfs_step':           onBfs(ev.data);         break;
+        case 'reset':              onReset(ev.data);       break;
+        case 'level_solved':       onLevelSolved(ev.data); break;
+        case 'level_failed':       onLevelFailed(ev.data); break;
+        case 'solver_error':       addLog('error', 'ERROR: ' + (ev.data.reason || '?')); break;
+    }
+}
+
+/* ── Handlers ─────────────────────────────────────────────────────────────── */
+function onSnapshot(d) {
+    if (d.games) {
+        Object.keys(d.games).forEach(function(id) {
+            if (!S.games[id]) S.games[id] = { status:'pending', score:0, title:id, totalLevels:0 };
+            S.games[id].status = d.games[id].status || 'pending';
+            S.games[id].score  = d.games[id].score || 0;
+        });
+    }
+    if (d.mean_rhae !== undefined) updateRhae(d.mean_rhae);
+    if (d.current_game) setCurrent(d.current_game);
+    renderTiles();
+}
+
+function onBenchStart(d) {
+    S.running    = true;
+    S.totalGames = d.n_games || 25;
+    S.gamesSolved = 0;
+    S.rhae       = 0;
+    S.metrics    = { states:0, frontier:0, resets:0, levelsCompleted:0, totalLevels:0 };
+    S.startMs    = Date.now();
+    // Reset all games to pending
+    GAME_IDS.forEach(function(id) {
+        S.games[id] = { status:'pending', score:0, title:id, totalLevels:0, levels:0 };
+    });
+    renderTiles();
+    clearGrid();
+    // Clear decision log
+    S.logEntries = [];
+    var logEl = el('decision-log');
+    if (logEl) logEl.textContent = '';
+    startTimer();
+    updateRhae(0);
+    flushMetrics();
+    setText('top-score', '0/' + S.totalGames);
+    setText('canvas-game', '--');
+    setText('canvas-level', '');
+    setBtnRunning(true);
+    addLog('phase', 'Benchmark started — ' + (d.n_games||'?') + ' games');
+}
+
+function onGameStart(d) {
+    var id = d.game_id;
+    var shortId = id.split('-')[0].toUpperCase();
+    if (!S.games[shortId]) S.games[shortId] = { status:'pending', score:0, title:shortId, totalLevels:0 };
+    S.games[shortId].title = d.title || shortId;
+    S.games[shortId].totalLevels = d.total_levels || 0;
+    S.games[shortId].status = 'active';
+    S.games[shortId].fullId = id;
+    setCurrent(shortId);
+    updateTile(shortId, 'active', 0);
+    clearGrid();
+    S.metrics.resets = 0;
+    S.metrics.states = 0;
+    S.metrics.frontier = 0;
+    S.metrics.totalLevels = d.total_levels || 0;
+    S.metrics.levelsCompleted = 0;
+    flushMetrics();
+    setText('canvas-game', shortId);
+    setText('canvas-level', '0/' + (d.total_levels || '?'));
+    addLog('phase', '\u25B6 ' + shortId);
+}
+
+function onGameEnd(d) {
+    var id = d.game_id;
+    var shortId = id.split('-')[0].toUpperCase();
+    var score = d.score || 0;
+    var status = score > 0 ? 'solved' : 'failed';
+    if (S.games[shortId]) { S.games[shortId].status = status; S.games[shortId].score = score; }
+    updateTile(shortId, status, score);
+    if (score > 0) S.gamesSolved++;
+    // Recompute mean RHAE
+    var scores = [];
+    Object.keys(S.games).forEach(function(k) {
+        var g = S.games[k];
+        if (g.status === 'solved' || g.status === 'failed') scores.push(g.score || 0);
+    });
+    var mean = scores.length > 0
+        ? scores.reduce(function(a,b){return a+b;},0) / S.totalGames * 100
+        : 0;
+    updateRhae(mean);
+    setText('top-score', S.gamesSolved + '/' + S.totalGames);
+    addLog(score > 0 ? 'solved' : 'failed',
+        (score > 0 ? '\u2713 ' : '\u2717 ') + shortId + ' ' +
+        (score*100).toFixed(1) + '% (' + (d.levels_completed||0) + '/' + (d.total_levels||0) + ')');
+}
+
+function onBenchEnd(d) {
+    S.running = false;
+    updateRhae(d.mean_rhae || 0);
+    stopTimer();
+    setBtnRunning(false);
+    addLog('phase', '\u2713 Complete — ' + (d.mean_rhae||0).toFixed(2) + '% RHAE');
+}
+
+function onPhase(d) {
+    var phase = (d.phase || 'IDLE').toUpperCase();
+    var phaseEl = el('canvas-phase');
+    if (phaseEl) { phaseEl.textContent = phase; }
+    setText('strategy-row', d.strategy || '--');
+    addLog('phase', 'Phase: ' + phase + (d.strategy ? ' — ' + d.strategy : ''));
+}
+
+function onProbe(d) {
+    // Only log at lower speeds to avoid noise
+    if (S.speed <= 5) {
+        addLog('probe', 'Probe a=' + d.action + ' eff=' + d.effective + ' \u0394px=' + (d.diff_pixels||0));
+    }
+}
+
+function onState(d) {
+    S.metrics.states   = d.total_states || (S.metrics.states + 1);
+    S.metrics.frontier = Math.max(0, (S.metrics.frontier || 0) + 1);
+    scheduleMetrics();
+    // Only log state events periodically
+    if (d.total_states % 100 === 0 || d.total_states <= 10) {
+        addLog('state', 'States: ' + fmt(d.total_states) + ' depth=' + d.depth);
+    }
+}
+
+function onBfs(d) {
+    S.metrics.frontier = Math.max(0, (S.metrics.frontier || 0) + (d.is_new ? 1 : -1));
+    scheduleMetrics();
+}
+
+function onReset(d) {
+    S.metrics.resets = d.count || 0;
+    scheduleMetrics();
+    if (d.count % 100 === 0 || d.count <= 5) {
+        addLog('reset', 'Reset #' + fmt(d.count));
+    }
+}
+
+function onLevelSolved(d) {
+    S.metrics.levelsCompleted = d.level;
+    flushMetrics();
+    setText('canvas-level', d.level + '/' + (S.metrics.totalLevels || '?'));
+    addLog('solved', 'Level ' + d.level + ' \u2713 RHAE=' + ((d.rhae||0)*100).toFixed(1) + '%');
+}
+
+function onLevelFailed(d) {
+    addLog('failed', 'Level ' + d.level + ' \u2717 ' + (d.reason || ''));
+}
+
+/* ── Canvas ───────────────────────────────────────────────────────────────── */
+function clearGrid() {
+    S.grid.fill(0);
+    var c = el('game-canvas');
+    if (c) { var ctx = c.getContext('2d'); ctx.fillStyle = '#000'; ctx.fillRect(0,0,64,64); }
+}
+
+function applyDiff(changes, ctx, gridArr) {
+    if (!changes || !changes.length) return;
+    var img = ctx.getImageData(0, 0, 64, 64);
+    var d = img.data;
+    for (var i = 0; i < changes.length; i++) {
+        var ch = changes[i];
+        // changes are [row, col, color] from the solver
+        var r = ch[0], c = ch[1], ci = ch[2] & 15;
+        if (r < 0 || r >= 64 || c < 0 || c >= 64) continue;
+        var idx = r * 64 + c;
+        if (gridArr) gridArr[idx] = ci;
+        var rgb = hexToRgb(ARC_COLORS[ci]);
+        var p = idx * 4;
+        d[p]   = rgb[0];
+        d[p+1] = rgb[1];
+        d[p+2] = rgb[2];
+        d[p+3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+}
+
+function scheduleFrame() {
+    if (S.pendingAF) return;
+    S.pendingAF = requestAnimationFrame(flushFrames);
+}
+
+function flushFrames() {
+    S.pendingAF = null;
+    if (!S.frameBuffer.length) return;
+    var canvas = el('game-canvas');
+    if (!canvas) { S.frameBuffer = []; return; }
+    var ctx = canvas.getContext('2d');
+
+    // Speed throttle
+    var skip;
+    if      (S.speed <= 1) skip = 1;
+    else if (S.speed === 5) skip = 4;
+    else if (S.speed === 10) skip = 8;
+    else skip = S.frameBuffer.length;
+
+    var start = skip >= S.frameBuffer.length ? 0 : S.frameBuffer.length - skip;
+    for (var i = start; i < S.frameBuffer.length; i++) {
+        applyDiff(S.frameBuffer[i], ctx, S.grid);
+    }
+    S.frameBuffer = [];
+}
+
+/* ── Tiles ────────────────────────────────────────────────────────────────── */
+function renderTiles() {
+    var bar = el('tile-bar');
+    if (!bar) return;
+    bar.textContent = '';
+    S.gameOrder.forEach(function(id) {
+        var g = S.games[id] || { status:'pending', score:0 };
+        var t = document.createElement('div');
+        t.className = 'tile ' + (g.status || 'pending');
+        t.id = 'tile-' + id;
+        if (id === S.currentGame) t.classList.add('current');
+        var tid = document.createElement('span');
+        tid.className = 'tid';
+        tid.textContent = id;
+        var tpct = document.createElement('span');
+        tpct.className = 'tpct';
+        tpct.textContent = g.score > 0 ? ((g.score*100).toFixed(0) + '%') : '';
+        t.appendChild(tid);
+        t.appendChild(tpct);
+        t.addEventListener('click', function() { enterExplorer(id); });
+        bar.appendChild(t);
+    });
+}
+
+function updateTile(id, status, score) {
+    if (!S.games[id]) S.games[id] = { status:'pending', score:0, title:id, totalLevels:0 };
+    S.games[id].status = status;
+    S.games[id].score = score;
+    var t = el('tile-' + id);
+    if (!t) { renderTiles(); return; }
+    t.className = 'tile ' + status;
+    if (id === S.currentGame) t.classList.add('current');
+    var pct = t.querySelector('.tpct');
+    if (pct) pct.textContent = score > 0 ? ((score*100).toFixed(0) + '%') : '';
+}
+
+function setCurrent(id) {
+    var prev = S.currentGame;
+    S.currentGame = id;
+    if (prev) { var pt = el('tile-' + prev); if (pt) pt.classList.remove('current'); }
+    var t = el('tile-' + id);
+    if (t) t.classList.add('current');
+}
+
+/* ── Metrics ──────────────────────────────────────────────────────────────── */
+function scheduleMetrics() {
+    S.metricsDirty = true;
+    if (S.metricsRAF) return;
+    S.metricsRAF = requestAnimationFrame(function() {
+        S.metricsRAF = null;
+        if (S.metricsDirty) flushMetrics();
+    });
+}
+
+function flushMetrics() {
+    S.metricsDirty = false;
+    setText('m-states',   fmt(S.metrics.states));
+    setText('m-frontier', fmt(S.metrics.frontier));
+    setText('m-resets',   fmt(S.metrics.resets));
+    setText('m-levels',   S.metrics.levelsCompleted + '/' + (S.metrics.totalLevels || '?'));
+    // Console info bar
+    setText('ci-states', fmt(S.metrics.states));
+    setText('ci-resets', fmt(S.metrics.resets));
+}
+
+/* ── Decision Log ─────────────────────────────────────────────────────────── */
+function addLog(cls, text) {
+    S.logEntries.push({ cls: cls, text: text });
+    if (S.logEntries.length > S.LOG_MAX) S.logEntries.shift();
+
+    var log = el('decision-log');
+    if (!log) return;
+    var entry = document.createElement('div');
+    entry.className = 'log-entry';
+    var dot = document.createElement('span');
+    dot.className = 'log-dot ' + cls;
+    var txt = document.createElement('span');
+    txt.textContent = text;
+    entry.appendChild(dot);
+    entry.appendChild(txt);
+    log.appendChild(entry);
+    while (log.children.length > S.LOG_VISIBLE * 2) log.removeChild(log.firstChild);
+    log.scrollTop = log.scrollHeight;
+}
+
+/* ── RHAE ─────────────────────────────────────────────────────────────────── */
+function updateRhae(pct) {
+    S.rhae = pct;
+    var e = el('top-rhae');
+    if (e) {
+        e.textContent = pct.toFixed(2) + '%';
+        e.style.color = pct >= 50 ? '#2ECC40' : pct >= 20 ? '#FFDC00' : '#FF4136';
+    }
+    setText('ci-rhae', pct.toFixed(1) + '%');
+}
+
+/* ── Timer ────────────────────────────────────────────────────────────────── */
+function startTimer() {
+    stopTimer();
+    S.startMs = Date.now();
+    S.timerInterval = setInterval(tickTimer, 500);
+}
+function stopTimer() {
+    if (S.timerInterval) { clearInterval(S.timerInterval); S.timerInterval = null; }
+}
+function tickTimer() {
+    if (!S.startMs) return;
+    var s = Math.floor((Date.now() - S.startMs) / 1000);
+    setText('top-timer', pad(Math.floor(s/60)) + ':' + pad(s%60));
+}
+
+/* ── Run control ──────────────────────────────────────────────────────────── */
+function setBtnRunning(running) {
+    var btn = el('btn-run');
+    if (!btn) return;
+    if (running) {
+        btn.textContent = '\u25A0 Stop';
+        btn.classList.add('stop');
+    } else {
+        btn.textContent = '\u25B6 Run';
+        btn.classList.remove('stop');
+    }
+}
+
+window.toggleRun = function() {
+    if (S.running) {
+        fetch('/api/stop', { method: 'POST' }).then(function(r) { return r.json(); }).then(function() {
+            S.running = false;
+            setBtnRunning(false);
+            stopTimer();
+        });
+    } else {
+        var mode = el('sel-mode').value;
+        var game = el('inp-game').value.trim();
+        var url = '/api/start?mode=' + mode;
+        if (game) url += '&game=' + encodeURIComponent(game);
+        // Reset UI immediately — don't wait for benchmark_start event
+        GAME_IDS.forEach(function(id) {
+            S.games[id] = { status:'pending', score:0, title:id, totalLevels:0, levels:0 };
+        });
+        S.gamesSolved = 0;
+        S.rhae = 0;
+        S.metrics = { states:0, frontier:0, resets:0, levelsCompleted:0, totalLevels:0 };
+        S.logEntries = [];
+        var logEl = el('decision-log');
+        if (logEl) logEl.textContent = '';
+        renderTiles();
+        clearGrid();
+        updateRhae(0);
+        flushMetrics();
+        setText('top-score', '0/25');
+        setText('canvas-game', '--');
+        setText('canvas-level', '');
+        setBtnRunning(true);
+        fetch(url, { method: 'POST' }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.error) { alert(d.error); setBtnRunning(false); return; }
+        });
+    }
+};
+
+/* ── Speed ────────────────────────────────────────────────────────────────── */
+window.setSpeed = function(s) {
+    S.speed = s;
+    document.querySelectorAll('#speed-group .pb-btn').forEach(function(b) {
+        var bs = parseInt(b.getAttribute('data-speed'), 10);
+        if (bs === s) b.classList.add('on'); else b.classList.remove('on');
+    });
+};
+
+/* ── Replay ───────────────────────────────────────────────────────────────── */
+window.replayLast = function() {
+    fetch('/events')
+        .then(function(r) { return r.ok ? r.text() : null; })
+        .then(function(text) {
+            if (!text) return;
+            var events = text.trim().split('\n').filter(Boolean).map(function(l) {
+                try { return JSON.parse(l); } catch(_) { return null; }
+            }).filter(Boolean);
+            if (!events.length) return;
+            // Reset
+            S.games = {};
+            S.gamesSolved = 0;
+            S.rhae = 0;
+            S.metrics = { states:0, frontier:0, resets:0, levelsCompleted:0, totalLevels:0 };
+            S.logEntries = [];
+            var logEl = el('decision-log');
+            if (logEl) logEl.textContent = '';
+            GAME_IDS.forEach(function(id) {
+                S.games[id] = { status:'pending', score:0, title:id, totalLevels:0 };
+            });
+            renderTiles();
+            clearGrid();
+            updateRhae(0);
+            flushMetrics();
+            var i = 0;
+            function step() {
+                if (i >= events.length) return;
+                var batch = S.speed === 1 ? 1 : S.speed === 5 ? 10 : S.speed === 10 ? 50 : events.length - i;
+                var end = Math.min(i + batch, events.length);
+                for (; i < end; i++) handleEvent(events[i]);
+                if (i < events.length) requestAnimationFrame(step);
+            }
+            step();
+        });
+};
+
+/* ── Explorer (drill-down) ────────────────────────────────────────────────── */
+var explorerEvents = {};  // gameId -> [events]
+var explorerGameId = null;
+
+// Buffer events per game (called from handleEvent)
+function bufferExplorerEvent(ev) {
+    var gid = ev.data && ev.data.game_id;
+    if (!gid) {
+        // Use current game for events without game_id
+        if (S.currentGame) {
+            gid = Object.keys(S.games).find(function(k) {
+                return S.games[k].fullId && ev.data;
+            }) || S.currentGame;
+        }
+    } else {
+        gid = gid.split('-')[0].toUpperCase();
+    }
+    if (!gid) return;
+    if (!explorerEvents[gid]) explorerEvents[gid] = [];
+    explorerEvents[gid].push(ev);
+    if (explorerEvents[gid].length > 5000) explorerEvents[gid] = explorerEvents[gid].slice(-3000);
+    if (explorerGameId === gid) refreshExplorerLog(gid);
+}
+
+function enterExplorer(gameId) {
+    explorerGameId = gameId;
+    el('overview-view').classList.add('hidden');
+    el('explorer-view').classList.add('active');
+    var g = S.games[gameId] || {};
+    setText('ex-title', gameId);
+    var score = g.score > 0 ? (g.score*100).toFixed(1) + '% RHAE' : (g.status === 'failed' ? 'UNSOLVED' : '');
+    setText('ex-score', score);
+    refreshExplorerLog(gameId);
+}
+
+function exitExplorer() {
+    explorerGameId = null;
+    el('overview-view').classList.remove('hidden');
+    el('explorer-view').classList.remove('active');
+}
+
+window.exitExplorer = exitExplorer;
+
+function refreshExplorerLog(gameId) {
+    var events = explorerEvents[gameId] || [];
+    var logEl = el('explorer-log');
+    if (!logEl) return;
+    logEl.textContent = '';
+    var slice = events.slice(-500);
+    var typeColors = {
+        'probe': '#7FDBFF', 'bfs_step': '#F012BE', 'state_discovered': '#2ECC40',
+        'phase_change': '#FFDC00', 'level_solved': '#2ECC40', 'level_failed': '#FF4136',
+        'reset': '#FF851B', 'frame_diff': '#3a3a5e', 'game_start': '#7FDBFF',
+        'game_complete': '#2ECC40', 'benchmark_start': '#0074D9',
+    };
+    slice.forEach(function(ev) {
+        var entry = document.createElement('div');
+        entry.className = 'ex-log-entry';
+        var ts = document.createElement('span');
+        ts.className = 'ex-log-ts';
+        ts.textContent = ev.timestamp ? new Date(ev.timestamp * 1000).toISOString().substr(11, 8) : '--:--:--';
+        var tp = document.createElement('span');
+        tp.className = 'ex-log-type';
+        tp.style.color = typeColors[ev.type] || '#9090b0';
+        tp.textContent = ev.type || '';
+        var dt = document.createElement('span');
+        dt.className = 'ex-log-data';
+        try { dt.textContent = JSON.stringify(ev.data || {}).slice(0, 120); } catch(_) {}
+        entry.appendChild(ts);
+        entry.appendChild(tp);
+        entry.appendChild(dt);
+        logEl.appendChild(entry);
+    });
+    logEl.scrollTop = logEl.scrollHeight;
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && explorerGameId) exitExplorer();
+});
+
+/* ── Boot ─────────────────────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', init);
+
+})();
+</script>
+</body>
+</html>

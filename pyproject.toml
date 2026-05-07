@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hardseal-occam"
+version = "0.4.0"
+description = "Occam ARC-AGI-3 solver (MIT) wrapped with hardseal-trace v0.2.0 (Apache-2.0) cryptographic reasoning-trace primitive. Wrapper code: CC0-1.0 OR MIT."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "CC0-1.0 OR MIT"
+authors = [{name = "Rico Allen"}]
+dependencies = [
+    "arc-agi>=0.9.1",
+    "numpy>=1.24",
+    "fastapi>=0.100",
+    "uvicorn>=0.20",
+    "websockets>=11.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["hardseal_occam", "hardseal_trace"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"occam_upstream/solver" = "solver"
+"occam_upstream/viewer" = "viewer"

@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "occam-solver"
+version = "0.1.0"
+description = "Occam: Algorithmic ARC-AGI-3 solver with live visualization"
+requires-python = ">=3.10"
+dependencies = [
+    "arc-agi",
+    "numpy>=1.24",
+    "fastapi>=0.100",
+    "uvicorn>=0.20",
+    "websockets>=11.0",
+]
+
+[project.scripts]
+occam = "viewer.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["solver", "viewer"]

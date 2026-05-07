@@ -1,0 +1,147 @@
+{
+  "run_uuid": "8542794c-abd8-405a-985b-60f5df9b8e2d",
+  "mode": "full",
+  "game_filter": null,
+  "wall_s": 1629.8,
+  "rhae_pct": 60.0132,
+  "games_solved": 17,
+  "n_games": 25,
+  "trace_count": 106968,
+  "avg_pods": 0.21820357490090495,
+  "chain_valid": true,
+  "per_game_chain_validation": [
+    {
+      "game_idx": 0,
+      "valid": true,
+      "msg": "OK: 7537 traces verified"
+    },
+    {
+      "game_idx": 1,
+      "valid": true,
+      "msg": "OK: 46 traces verified"
+    },
+    {
+      "game_idx": 2,
+      "valid": true,
+      "msg": "OK: 2555 traces verified"
+    },
+    {
+      "game_idx": 3,
+      "valid": true,
+      "msg": "OK: 25 traces verified"
+    },
+    {
+      "game_idx": 4,
+      "valid": true,
+      "msg": "OK: 7215 traces verified"
+    },
+    {
+      "game_idx": 5,
+      "valid": true,
+      "msg": "OK: 407 traces verified"
+    },
+    {
+      "game_idx": 6,
+      "valid": true,
+      "msg": "OK: 41 traces verified"
+    },
+    {
+      "game_idx": 7,
+      "valid": true,
+      "msg": "OK: 52 traces verified"
+    },
+    {
+      "game_idx": 8,
+      "valid": true,
+      "msg": "OK: 51 traces verified"
+    },
+    {
+      "game_idx": 9,
+      "valid": true,
+      "msg": "OK: 51 traces verified"
+    },
+    {
+      "game_idx": 10,
+      "valid": true,
+      "msg": "OK: 23 traces verified"
+    },
+    {
+      "game_idx": 11,
+      "valid": true,
+      "msg": "OK: 43 traces verified"
+    },
+    {
+      "game_idx": 12,
+      "valid": true,
+      "msg": "OK: 42 traces verified"
+    },
+    {
+      "game_idx": 13,
+      "valid": true,
+      "msg": "OK: 56 traces verified"
+    },
+    {
+      "game_idx": 14,
+      "valid": true,
+      "msg": "OK: 47 traces verified"
+    },
+    {
+      "game_idx": 15,
+      "valid": true,
+      "msg": "OK: 70 traces verified"
+    },
+    {
+      "game_idx": 16,
+      "valid": true,
+      "msg": "OK: 40 traces verified"
+    },
+    {
+      "game_idx": 17,
+      "valid": true,
+      "msg": "OK: 9 traces verified"
+    },
+    {
+      "game_idx": 18,
+      "valid": true,
+      "msg": "OK: 9460 traces verified"
+    },
+    {
+      "game_idx": 19,
+      "valid": true,
+      "msg": "OK: 74765 traces verified"
+    },
+    {
+      "game_idx": 20,
+      "valid": true,
+      "msg": "OK: 155 traces verified"
+    },
+    {
+      "game_idx": 21,
+      "valid": true,
+      "msg": "OK: 50 traces verified"
+    },
+    {
+      "game_idx": 22,
+      "valid": true,
+      "msg": "OK: 1339 traces verified"
+    },
+    {
+      "game_idx": 23,
+      "valid": true,
+      "msg": "OK: 904 traces verified"
+    },
+    {
+      "game_idx": 24,
+      "valid": true,
+      "msg": "OK: 1985 traces verified"
+    }
+  ],
+  "scorecard_id": "9f87a433-8dd0-4556-84da-5be8c4920639",
+  "callback_stats": {
+    "events_received": 165348,
+    "events_handled": 165348,
+    "traces_emitted": 106968,
+    "errors": 0
+  },
+  "occam_results_pointer": "results/occam_results_*.json"
+}
